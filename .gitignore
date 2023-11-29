@@ -1,0 +1,7 @@
+
+*.wav
+*.jams
+*.xml
+#ignore dataset path
+*Datasets/
+*__pycache__/

@@ -1,0 +1,38 @@
+{
+	"beach house - clean 01": [["D3"], ["G3"], ["A3"], ["C4"]],
+	"beach house - clean 02": [["A3"], ["C4"], ["D4"], ["E4"]],
+	"beach house - clean 03": [["G4"], ["C4"]],
+	"beach house - clean 04": [["D4"], ["D4"], ["D4"], ["E4"]],
+	"beach house - clean 05": [["A3"], ["C4"], ["A3"]],
+	"beach house - clean 06": [["D3"], ["G3"], ["A3"], ["C4"]],
+	"beach house - clean 07": [["A3"]],
+	"beach house - clean 08": [["D3"], ["G3"], ["A3"], ["C4"]],
+	"beach house - clean 09": [["D4"], ["G4"], ["G4"], ["A4"]],
+	"beach house - clean 10": [["C5"], ["A4"], ["G4"], ["E4"], ["G4"], ["A4"]],
+	"beach house - clean 11": [["D3"], ["A3"]],
+	"beach house - clean 12": [["C4"], ["D4"], ["E4"], ["D4"]],
+	"beach house - clean 13": [["D4"], ["C4"], ["A3"], ["G3"]],
+	"beach house - clean 14": [["G3"], ["G3"], ["A3"], ["G3"], ["E3"]],
+	"beach house - clean 15": [["A4"], ["C5"]],
+	"beach house - clean 16": [["A4"], ["E4"], ["A4"]],
+	"beach house - clean 17": [["A4"], ["C5"], ["D5"], ["D5"], ["E5"]],
+	"beach house - clean 18": [["D5"], ["C5"], ["E4"], ["A4"]],
+	"beach house - clean 19": [
+		["C5", "E5"],
+		["C5", "E5"]
+	],
+	"beach house - clean 20": [
+		["E5", "C5"],
+		["E5", "C5"],
+		["B4", "D5"],
+		["B4", "D5"]
+	],
+	"beach house - clean 21": [
+		["D5", "B4"],
+		["D5", "B4"],
+		["A4", "C5"],
+		["A4", "C5"]
+	],
+	"beach house - clean 22": [["A4", "C5"], ["A4"]],
+	"beach house - clean 23": [["C5"], ["A4"], ["E4"], ["A4"]]
+}
