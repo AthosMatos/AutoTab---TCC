@@ -1,12 +1,9 @@
 # AutoTab---TCC
-Trabalho de conclusão de curso
+Link do dataset - https://drive.google.com/drive/folders/1NQQJtMrtM6JdrB8MznYN2_0YIkImVnN4?usp=sharing
+Link do TCC - https://www.overleaf.com/read/mffsmcpgrjry#354d1f
 
 # Resumo do projeto
 Como parte integral da vida humana e profundamente enraizada em nossa existência, a musica é capaz de permitir diversas formas de deleite. Entre os abundantes receptores deste contentamento estão os músicos, amadores ou profissionais, em algum momento todos já passaram pela exaustiva tarefa de manualmente transcrever músicas. Para os mais experientes, esse oficio pode ser algo do cotidiano, porém para iniciantes essa tarefa tende a ser uma das mais difíceis de dominar, o que para muitos resulta em frustração e desistência.
 Esta monografia propõe uma metodologia em forma de ferramenta para transcrição automática de músicas, o resultado da transcrição se dá em tablaturas, consideradas por muitos usuários o modelo mais amigável de representação musical. Essa ferramenta visa ajudar iniciantes a inibir essa sensação de frustração e dificuldade na difícil tarefa de transcrição musical, permitindo o fluxo do processo criativo.
 Esse assunto não é algo novo, diversos métodos e ferramentas que tem essa finalidade já foram desenvolvidas, entretanto, essa monografia descreve uma pipeline diferente das demais, capaz de tratar fontes contínuas de áudios, utilizando a aptidão identificativa das Redes Neurais Convolucionais(CNN) que ao trabalhar em conjunto com diversos algorítimos de pré e pós processamento resultam em um produto não apenas altamente modular mas também extremamente preciso em suas transcrições, com múltiplas possibilidades de aplicação como em plugins e softwares. Foram utilizadas tecnologias de ponta para tratar o áudio e classifica-lo, empregando respectivamente: Bibliotecas de processamento de sinais para transformar áudios em espectogramas e otimiza-los para uma rede neural; uma CNN capaz de identificar notas, harmonias e acordes em um intervalo de som. Além disso o sistema criado nesse projeto emprega uma funcionalidade indispensável para qualquer violonista e guitarrista: a capacidade de gerar diferentes tablaturas baseadas na mesma "ideia musical", o que torna essa ferramenta adaptável ao usuário e suas preferências. 
 Perante essas informações constata-se a contribuição dessa monografia para o campo da tecnologia musical demonstrando a capacidade de uma deep learning.
-
-
-Link do dataset - https://drive.google.com/drive/folders/1NQQJtMrtM6JdrB8MznYN2_0YIkImVnN4?usp=sharing
-Link do TCC - https://www.overleaf.com/read/mffsmcpgrjry#354d1f
