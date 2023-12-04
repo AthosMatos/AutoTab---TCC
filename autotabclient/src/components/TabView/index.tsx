@@ -32,6 +32,12 @@ const TabView = (props: TabViewI) => {
             }
 
         }
+        else if (activatedNotes.show) {
+            setTimedActivatedNotes(activatedNotes.indexes)
+        }
+        else {
+            setTimedActivatedNotes([])
+        }
     }, [activatedNotes])
 
 

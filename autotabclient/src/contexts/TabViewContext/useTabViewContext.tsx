@@ -15,6 +15,7 @@ type ActivateNotesT = {
     loop?: boolean;
     animate?: boolean;
     animationIndex?: number;
+    show?: boolean;
 };
 
 interface TabViewContextI {
@@ -43,6 +44,7 @@ export const TabViewProvider = (props: any) => {
         indexes: [],
         loop: false,
         animate: false,
+        show: false,
     })
     const allNotesFromFrets = genNotes({
         FRETS: frets,
