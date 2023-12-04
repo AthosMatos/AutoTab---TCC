@@ -16,20 +16,57 @@ type ActivateNotesT = {
     animate?: boolean;
     animationIndex?: number;
     show?: boolean;
+    animationStart?: boolean;
 };
 
+type ActivateNotesUpdateT = {
+    notes?: string[];
+    indexes?: SpecificNotes[];
+    loop?: boolean;
+    animate?: boolean;
+    animationIndex?: number;
+    show?: boolean;
+    animationStart?: boolean;
+};
+
+type ActivateChordsT = {
+    notesData: {
+        notes: string[];
+        indexes: SpecificNotes[];
+    }[];
+    loop?: boolean;
+    animate?: boolean;
+    animationIndex?: number;
+    show?: boolean;
+    animationStart?: boolean;
+};
+type ActivateChordsUpdateT = {
+    notesData?: {
+        notes: string[];
+        indexes: SpecificNotes[];
+    }[];
+    loop?: boolean;
+    animate?: boolean;
+    animationIndex?: number;
+    show?: boolean;
+    animationStart?: boolean;
+};
 interface TabViewContextI {
     sequence: SequenceT;
     updateSequence: (newSequence: SequenceT) => void;
     activatedNotes: ActivateNotesT;
-    updateActivatedNotes: (newActivatedNotes: ActivateNotesT) => void;
+    updateActivatedNotes: (newActivatedNotes: ActivateNotesUpdateT) => void;
     frets: number;
     allNotesFromFrets: string[][];
-
+    activatedChords: ActivateChordsT;
+    updateActivatedChords: (newActivatedChords: ActivateChordsUpdateT) => void;
+    updateSpeed: number;
+    updateUpdateSpeed: (newUpdateSpeed: number) => void;
+    showNotes: boolean;
+    setShowNotes: (newShowNotes: boolean) => void;
 }
 
 const TabViewContext = createContext<TabViewContextI>({} as any);
-
 
 
 export const TabViewProvider = (props: any) => {
@@ -46,19 +83,51 @@ export const TabViewProvider = (props: any) => {
         animate: false,
         show: false,
     })
+    const [activatedChords, setActivatedChords] = useState<ActivateChordsT>({
+        notesData: [],
+        loop: false,
+        animate: false,
+        show: false,
+    })
     const allNotesFromFrets = genNotes({
         FRETS: frets,
     })[1];
 
+    const [updateSpeed, setUpdateSpeed] = useState<number>(200);
+    const [showNotes, setShowNotes] = useState<boolean>(false);
+
+
+    function updateActivatedChords(params: ActivateChordsUpdateT) {
+        setActivatedChords(
+            {
+                ...activatedChords,
+                ...params
+            }
+        )
+    }
+    function updateActivatedNotes(params: ActivateNotesUpdateT) {
+        setActivatedNotes(
+            {
+                ...activatedNotes,
+                ...params
+            }
+        )
+    }
 
     return (
         <TabViewContext.Provider value={{
             sequence,
             updateSequence: setSequence,
             activatedNotes,
-            updateActivatedNotes: setActivatedNotes,
+            activatedChords,
+            updateActivatedChords,
+            updateActivatedNotes,
             frets,
-            allNotesFromFrets
+            allNotesFromFrets,
+            updateSpeed,
+            updateUpdateSpeed: setUpdateSpeed,
+            showNotes,
+            setShowNotes
         }}>
             {props.children}
         </TabViewContext.Provider>

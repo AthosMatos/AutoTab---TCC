@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useWebSocket } from "../../contexts/useWebSocket"
 import { getPosbySeq, getPosbySeq2 } from "../../utils/path"
 import useWindowResize from "../../hooks/useWindowResize"
@@ -9,20 +9,30 @@ const MainPage = () => {
     const windowSize = useWindowResize(0.9)
     const SeqTest = ["C4", "D4", "E4", "F4"];
     const SeqTest2 = [
+
         ["D3", "A3", "D4", "F#4"],//DMAJOR
         ["A2", "E3", "A3", "C#4", "E4"],//AMAJOR
-        ["C4", "D4", "E4", "F4", "A4", "B4"],
+        ["F2", "C3", "F3", "A3", "C4", "F4"], //FMAJOR
         ["G4", "A4", "B4"],
     ]
-    const { activatedNotes, allNotesFromFrets, frets, updateActivatedNotes } = useTabViewContext()
-    const positions = getPosbySeq2(SeqTest2, allNotesFromFrets, frets)
-
     /* 
+    prepare for the next step
+    const SeqTest2 = [
+        "C4", "D4", "E4", "F4"
+        ["D3", "A3", "D4", "F#4"],//DMAJOR
+        ["A2", "E3", "A3", "C#4", "E4"],//AMAJOR
+        ["F2", "C3", "F3", "A3", "C4", "F4"], //FMAJOR
+        ["G4", "A4", "B4"],
+    ]
+    */
+    const { activatedChords, allNotesFromFrets, frets, updateActivatedChords, updateUpdateSpeed, updateActivatedNotes, setShowNotes, showNotes } = useTabViewContext()
+    const chords = getPosbySeq2(SeqTest2, allNotesFromFrets, frets)
+    const notes = getPosbySeq(SeqTest, allNotesFromFrets, frets)
+
     useEffect(() => {
         updateActivatedNotes({
-            ...activatedNotes,
             notes: SeqTest,
-            indexes: positions.map((posi) => {
+            indexes: notes.map((posi) => {
                 const pos = posi[1]
                 return {
                     string: pos.string,
@@ -30,47 +40,83 @@ const MainPage = () => {
                 }
             })
         })
-    }, []) */
+
+
+    }, [])
 
     useEffect(() => {
-        updateActivatedNotes({
-            ...activatedNotes,
-            notes: SeqTest,
-            indexes: positions[1].map((posi) => {
-                const pos = posi[1]
+        updateUpdateSpeed(500)
+        updateActivatedChords({
+            notesData: chords.map((posi) => {
                 return {
-                    string: pos.string,
-                    fret: pos.fret
+                    notes: SeqTest,
+                    indexes: posi.map((posi) => {
+                        const pos = posi[1]
+                        return {
+                            string: pos.string,
+                            fret: pos.fret
+                        }
+                    })
                 }
             })
+
         })
     }, [])
 
     return (
         <div>
             <button onClick={() => {
-                updateActivatedNotes({
-                    ...activatedNotes,
+                showNotes ?
+                    updateActivatedNotes({
+                        animate: true,
+                        loop: false,
+                        animationStart: true,
+                    })
+                    :
+                    updateActivatedChords({
+                        animate: true,
+                        loop: false,
+                        animationStart: true,
+                    })
+                /* 
+                    updateActivatedChords({
                     animate: true,
                     loop: false,
+                    animationStart: true,
                 })
+                */
             }}>Run Predict</button>
             <button onClick={() => {
-                updateActivatedNotes({
-                    ...activatedNotes,
-                    animate: false,
-                    loop: false,
-                    show: true
-                })
+                showNotes ?
+                    updateActivatedNotes({
+                        animate: false,
+                        loop: false,
+                        show: true
+                    })
+                    :
+                    updateActivatedChords({
+                        animate: false,
+                        loop: false,
+                        show: true
+                    })
             }}>Show Predict</button>
             <button onClick={() => {
-                updateActivatedNotes({
-                    ...activatedNotes,
-                    animate: false,
-                    loop: false,
-                    show: false
-                })
+                showNotes ?
+                    updateActivatedNotes({
+                        animate: false,
+                        loop: false,
+                        show: false
+                    })
+                    :
+                    updateActivatedChords({
+                        animate: false,
+                        loop: false,
+                        show: false
+                    })
             }}>Hide Predict</button>
+            <button onClick={() => {
+                setShowNotes(!showNotes)
+            }}>Toggle between Notes/Chords</button>
             <TabView windowSize={windowSize} />
         </div>
 

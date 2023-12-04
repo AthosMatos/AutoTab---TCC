@@ -57,7 +57,7 @@ export function getPosbySeq2(Seq: string[][], allNotesFromFrets: string[][], fre
 		ChordsPositions.push(Positions);
 	});
 
-	console.log(ChordsPositions);
+	//console.log(ChordsPositions);
 	return ChordsPositions;
 }
 
