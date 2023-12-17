@@ -2,29 +2,113 @@ from multiprocessing import Manager, Process, cpu_count
 import os
 from typing import List
 from utils.audio.load_prepare import loadAndPrepare
-from utils.notes import genNotes
+from utils.notes import genNotes, genNotes_v2
 import tensorflow as tf
 import numpy as np
 from utils.paths import CUSTOM_DATASETS
 
-
 # 30 frets because the dataset has harmonics that go beyond the 22 frets
-GUITAR_NOTES, _, GUITAR_NOTES_INDEXES = genNotes(indexes=True, FRETS=30)
+GUITAR_NOTES = genNotes_v2("C2", "A6")
 
 
-""" 
-TRANSPOSING THE SPEC- yield very good results, keep that in mind, good predictions and identification of singular notes on a harmony
+np.save(f"all_labels.npy", GUITAR_NOTES)
 
 
-"""
+outPath = "chords_np_cqt_44.1k"
+sampleRate = 44100
+ignore = ["notes", "Augmented"]
 
 
-def map_to_outs(labelnotes: list, uniqueLabels):
+def printConfig():
+    os.system("cls")
+    print("|| Current config ||")
+    print("Output path:", outPath)
+    print("Sample rate:", sampleRate)
+    # if len(ignore) > 0: # print only if there are ignored folders, case not print none
+    if len(ignore) > 0:
+        print("Ignored folders:", ignore)
+    else:
+        print("Ignored folders: none")
+
+    print()
+
+
+def manualConfiguration():
+    global outPath, sampleRate, ignore
+
+    printConfig()
+
+    if input("Notes or chords? ").lower() == "notes":
+        outPath += "notes"
+    else:
+        outPath += "chords"
+
+    printConfig()
+
+    if input("1- 44.1k or 2- 16k? ").lower() == "2":
+        sampleRate = 16000
+        outPath += "_16k"
+    else:
+        sampleRate = 44100
+        outPath += "_44.1k"
+
+    printConfig()
+
+    while True:
+        print("1 - dataset")
+        print("2 - std folder")
+        print("3 - done")
+        folderToIgn = input("Choose type of folders to ignore: ")
+        printConfig()
+
+        if folderToIgn == "1":
+            print("For multiple datasets, separate them with a comma")
+
+            print("1 - GuitarSet")
+            print("2 - IDMT-SMT-GUITAR-V2")
+            print("3 - AthosSet")
+            print("4 - none")
+
+            ign = input("Choose the dataset to ignore: ").split(",")
+            for i in ign:
+                if i == "1":
+                    ignore.append("GuitarSet")
+                if i == "2":
+                    ignore.append("IDMT-SMT-GUITAR-V2")
+                if i == "3":
+                    ignore.append("AthosSet")
+            printConfig()
+
+        elif folderToIgn == "2":
+            print("For multiple folders, separate them with a comma")
+
+            print("1 - chords")
+            print("2 - notes")
+            print("3 - augmented")
+            print("4 - none")
+
+            ign = input("Choose the folder to ignore: ").split(",")
+
+            for i in ign:
+                if i == "1":
+                    ignore.append("chords")
+                if i == "2":
+                    ignore.append("notes")
+                if i == "3":
+                    ignore.append("augmented")
+
+            printConfig()
+
+        elif folderToIgn == "3":
+            break
+
+
+def map_to_outs(labelnotes: list, uniqueLabels: list):
     # print("labelnotes", labelnotes)
     # start a np array filled with 'false'
     new_labels = np.full((len(uniqueLabels)), 0)
     for label in labelnotes:
-        index_of_label = uniqueLabels.tolist().index(label)
+        index_of_label = uniqueLabels.index(label)
         new_labels[index_of_label] = 1
         # print("index_of_label", index_of_label)
 
@@ -36,11 +120,14 @@ def getFilesPATHS(Fpaths: [str], extension=".wav"):
     labels_extend = []
     labels = []
     brk = False
+
     for path in Fpaths:
         # print(f"Loading {path}")
         for DIRS, _, files in os.walk(path):
             for file in files:
                 if file.endswith(extension):
+                    if any(x in DIRS for x in ignore):
+                        continue
                     LABEL = DIRS.split("\\")[-1]
                     labelnotes = LABEL.split("-")
                     if len(labelnotes) > 6:
@@ -63,19 +150,20 @@ def getFilesPATHS(Fpaths: [str], extension=".wav"):
     p = np.random.permutation(len(paths))
     """ paths, labels = np.array(paths)[p], np.array(labels)[p] """
     # labels_extend.append("none")
-    uniqueLabels = np.unique(labels_extend)
-    uniqueIndexes = np.arange(len(uniqueLabels))
+    # uniqueLabels = np.unique(labels_extend)
+    # uniqueLabels = GUITAR_NOTES
+
     newLabels = []
     for label in labels:
-        newLabels.append(map_to_outs(label, uniqueLabels))
+        newLabels.append(map_to_outs(label, GUITAR_NOTES))
     labels = np.array(newLabels)
 
     # print("newLabels", labels.shape)
-    print("unique labels", uniqueLabels)
+    print("unique labels", GUITAR_NOTES)
     # print("uniqueIndexes", uniqueIndexes)
 
     # print(updadteLabels.shape)
-    return np.array(paths)[p], np.array(newLabels)[p], labels_extend, uniqueLabels
+    return np.array(paths)[p], np.array(newLabels)[p], labels_extend, GUITAR_NOTES
 
 
 def load_from_path(
@@ -90,7 +178,11 @@ def load_from_path(
     for index, path in enumerate(PATHS):
         # spec, sr = loadAndPrepare(path)
         audio, _ = loadAndPrepare(
-            path, sample_rate=44100, expand_dims=True, pad=True, transpose=True
+            path,
+            sample_rate=sampleRate,
+            expand_dims=True,
+            pad=True,
+            transpose=False,
         )
 
         loaded_audios.append(audio)
@@ -103,10 +195,11 @@ def load_from_path(
 
 
 def main():
+    """if input("Manual config? (y/n) ").lower() == "y":
+    manualConfiguration()"""
+
     CPUS = cpu_count()
-    PATHS, LABELS, LABELS_EXTENDED, UNIQUE_LABELS = getFilesPATHS(
-        [CUSTOM_DATASETS.path]
-    )
+    PATHS, LABELS, _, _ = getFilesPATHS([CUSTOM_DATASETS.path])
     FILES_AMOUNT = len(PATHS)
 
     print(f"Preprocessing {FILES_AMOUNT} files with {CPUS} CPUs")
@@ -174,14 +267,14 @@ def main():
     # Perform actions to save or process the loaded data
     # For example, you can save them to a file, process them further, etc.
     print("Saving files")
-    path = "np_ds-transposed-new"
+
     # path = "np_ds"
     # check if the folder exists
-    if not os.path.exists(path):
-        os.makedirs(path)
+    if not os.path.exists(outPath):
+        os.makedirs(outPath)
 
     np.savez_compressed(
-        f"{path}/train_ds-6out.npz",
+        f"{outPath}/train_ds-6out.npz",
         x=x_train,
         y=y_train,
     )
@@ -195,7 +288,7 @@ def main():
         x=x_test,
         y=y_test,
     ) """
-    np.save(f"{path}/unique_labels-6out.npy", UNIQUE_LABELS)
+    # np.save(f"{outPath}/unique_labels-6out.npy", UNIQUE_LABELS)
 
     print("Files saved")
 

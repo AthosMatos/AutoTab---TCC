@@ -1,6 +1,7 @@
 import smoothColors from "../../../colors/smoothColors";
 import { Fret, Node, NodeText, TabWrapper } from "./styled";
 import { useTabViewContext } from "../../../contexts/TabViewContext/useTabViewContext";
+import { useRef } from "react";
 
 export interface SpecificNotes {
     string: number,
@@ -24,20 +25,7 @@ const Tab = (props: TabCanvasI) => {
 
     const { windowSize } = props
     const { allNotesFromFrets, frets } = useTabViewContext()
-
-    /* 
-    const nodeSizeValue = signal(interpolate(24, 111.5, 44.5, 162.33, windowSize.value.width / frets.value))
-    const fontSizeValue = signal(interpolate(36, 8, 159.33, 41.5, windowSize.value.width / frets.value))
-    const gap = signal(interpolate(8, 0.44, 159, 41.5, windowSize.value.width / frets.value))
-    const paddingHeight = signal(interpolate(1.2, 0.43, 159, 41.5, windowSize.value.width / frets.value)) 
-    */
-
-    /* const nodeSizeValue = windowSize.width / 36
-    const fontSizeValue = windowSize.width / 124
-    const fretNumberSize = windowSize.width / 70
-    const gap = windowSize.width / 170
-    const paddingHeight = windowSize.width / 130
-    const tabBorderRadius = windowSize.width / 130 */
+    const NodeRef = useRef<HTMLDivElement>(null)
 
     function defineColor(note: string) {
         let nodeColor = '#fff'
@@ -71,7 +59,7 @@ const Tab = (props: TabCanvasI) => {
 
         return { nodeColor, textColor }
     }
-    //convert allNotesFromFrets from [string][fret] to [fret][string]
+
     const allNotesFromFretsConverted = allNotesFromFrets[0].map((col, i) => allNotesFromFrets.map(row => row[i]))
 
     const TabW = windowSize.width ? windowSize.width : 400
@@ -120,6 +108,7 @@ const Tab = (props: TabCanvasI) => {
                                         activated = props.activatedNotes ? props.activatedNotes.includes(note) : false
                                         break
                                 }
+
 
                                 return (
                                     <Node

@@ -3,26 +3,52 @@ import numpy as np
 from utils.audio.load_prepare import loadAndPrepare
 from utils.paths import CUSTOM_DATASETS, RAW_DATASETS
 
-""" model = load_model("Models/model-out-6-Adam.h5")  # more precise """
-model = load_model("Models/model-out-6-Adam-new.h5")
-# model = load_model("Models/model-out-6-RMSPROP.h5") #more imaginative
+""" 
 
-unique_labels = np.load("np_ds-transposed-new/unique_labels-6out.npy")
+train_ds, unique_labels = (
+    np.load("chords_np_cqt_44.1k/train_ds-6out.npz"),
+    np.load("all_labels.npy"),
+)
 
-# path = f"{RAW_DATASETS.AthosSet}\\chords\\GMajor\\CHORD - G Major 01.wav"
-# path = f"{RAW_DATASETS.AthosSet}\\chords\\AMajor\\E2-A2-E3-A3-C♯4-E4\eletric - Chord - A - 2.wav"
-path = f"{RAW_DATASETS.AthosSet}\\chords\\DMajor\\CHORD - D Major 02.wav"
+print(train_ds["x"].shape)
+print(train_ds["y"].shape)
+print(unique_labels) 
 
+"""
+
+# path = RAW_DATASETS.path + "/musics/riffs test.wav"
+# path = RAW_DATASETS.AthosSet + "/chords/CMajor/CHORD - C Major 03.wav"
+model = load_model("Models/model_chords.h5")
+
+# model.summary()
+
+unique_labels = np.load("all_labels.npy")
+# unique_labels = np.load("np_ds-cqt-minmax-44100/unique_labels-6out.npy")
+
+
+""" DMAJOR
+|| D3 ||
+|| A3 ||
+|| D4 ||
+|| F#4 ||
+"""
+path = RAW_DATASETS.path + "/musics/g chord.wav"
 spec, _ = loadAndPrepare(
     path,
     sample_rate=44100,
-    transpose=True,
+    transpose=False,
     expand_dims=True,
     pad=True,
+    # audio_limit_sec=(0.38, 0.8)
+    # audio_limit_sec=(1.20, 1.40)
+    # audio_limit_sec=(1.80, 2.05)
+    # audio_limit_sec=(0, 2.5),
 )
 
 
-y_pred = model.predict(spec.reshape(1, spec.shape[0], spec.shape[1], spec.shape[2]))
+y_pred = model.predict(spec.reshape(1, spec.shape[0], spec.shape[1], 1))
+
+# print(y_pred)
 
 for i, pred in enumerate(y_pred):
     confidence = np.max(pred) * 100
@@ -30,15 +56,3 @@ for i, pred in enumerate(y_pred):
         print(f"|| {unique_labels[i]} - {confidence:.2f}% ||")
     """ print(np.argmax(pred))
     print(unique_labels[np.argmax(pred)]) """
-
-exit()
-
-confidences = []
-notes_preds = []
-for pred in y_pred:
-    confidence = np.max(pred[0]) * 100
-    confidences.append(confidence)
-    notes_preds.append(unique_labels[np.argmax(pred[0])])
-
-for i, note in enumerate(notes_preds):
-    print(f"|| {note} - {confidences[i]:.2f}% ||")

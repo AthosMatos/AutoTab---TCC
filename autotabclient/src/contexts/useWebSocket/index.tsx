@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { ArrayQueue, ConstantBackoff, Websocket, WebsocketBuilder, WebsocketEvent } from "websocket-ts";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 
 interface WebsocketProviderI {
@@ -9,8 +9,14 @@ interface WebsocketProviderI {
 interface WebsocketContextI {
 	connect: (url: string) => void;
 	getWebSocket: () => Websocket;
+	send: (message: MsgT) => void;
 	isConnected: boolean;
 }
+
+interface MsgT {
+	data: any;
+}
+
 const WebsocketContext = createContext<WebsocketContextI>({} as any);
 
 export const WebsocketProvider = ({ children }: WebsocketProviderI) => {
@@ -22,17 +28,21 @@ export const WebsocketProvider = ({ children }: WebsocketProviderI) => {
 		const checkIfConnected = (webSocket: Websocket) =>
 			new Promise(async (resolve: (res: string) => void, reject: (res: string) => void) => {
 				webSocket.addEventListener(WebsocketEvent.open, () => {
-					//ws.send("Hello World!");
+					//webSocket.send("Hello World!");
 					resolve("success");
 					setIsConnected(true);
 				});
 			});
-		function ToastLoading(webSocket: Websocket) {
-			toast.promise(checkIfConnected(webSocket), {
-				loading: "Conectando ao servidor de processamento...",
-				success: <b>Conectado ao servidor!</b>,
-				error: <b>Erro ao conectar!</b>,
-			});
+
+		//check if url is a valid url
+		if (!url || !url.includes("ws://")) {
+			toast("Web socket URL inválida!", {
+				style: {
+					background: '#b94b4b',
+					color: '#fff',
+				},
+			})
+			return;
 		}
 
 		const webS = new WebsocketBuilder(url)
@@ -40,7 +50,12 @@ export const WebsocketProvider = ({ children }: WebsocketProviderI) => {
 			.withBackoff(new ConstantBackoff(1000)) // retry every 1s
 			.build()
 		set_ws(webS);
-		ToastLoading(webS);
+
+		toast.promise(checkIfConnected(webS), {
+			loading: "Conectando ao servidor de processamento...",
+			success: <b>Conectado ao servidor!</b>,
+			error: <b>Erro ao conectar!</b>,
+		});
 
 
 	}
@@ -52,8 +67,22 @@ export const WebsocketProvider = ({ children }: WebsocketProviderI) => {
 		return ws;
 	}
 
+	function send(message: MsgT, asJson?: boolean) {
+		if (!isConnected || !ws) {
+			console.log("WebSocket is not connected");
+			return;
+		}
+		if (asJson) {
+			const msg = JSON.stringify(message);
+			ws.send(msg);
+			return;
+		}
+
+		ws.send(message.data);
+	}
+
 	return (
-		<WebsocketContext.Provider value={{ connect, getWebSocket, isConnected }}>
+		<WebsocketContext.Provider value={{ connect, getWebSocket, isConnected, send }}>
 			{children}
 		</WebsocketContext.Provider>
 	);

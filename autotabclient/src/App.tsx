@@ -16,7 +16,7 @@ function App() {
       <MainContainer>
 
         <Toaster
-          position="top-center"
+          position="top-right"
           reverseOrder={false}
         />
         <MainPage />

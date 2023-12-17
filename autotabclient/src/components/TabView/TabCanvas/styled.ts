@@ -1,4 +1,16 @@
-import styled from "styled-components";
+import styled, { keyframes, css } from "styled-components";
+
+const scaleAnimation = keyframes`
+  0% {
+    transform: scale(0.4);
+  }
+  50% {
+    transform: scale(0.8);
+  }
+  100% {
+    transform: scale(1.14);
+  }
+`;
 
 export const Node = styled.div<{ color: string; isButton: boolean; frets: number; TabW: number; activated: boolean }>`
 	width: ${(props) => (props.TabW / props.frets) * 0.68}px;
@@ -8,46 +20,36 @@ export const Node = styled.div<{ color: string; isButton: boolean; frets: number
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	//transition to only transform, filter and box-shadow
-	transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
 
+	transition: 0.2s ease, scale 0.1s ease;
 	user-select: none;
 	filter: brightness(0.4);
 	cursor: ${(props) => (props.isButton ? "pointer" : "default")};
-	box-shadow: ${(props) => (props.isButton ? "5px 0px 10px 0px rgba(0,0,0,0.35)" : "none")};
+	animation-name: opacity;
+	animation-duration: 0.8s;
+	animation-timing-function: ease;
 
 	${(props) =>
-		props.isButton
-			? props.activated
-				? `
+		props.isButton && props.activated
+			? `
 			filter: brightness(1);
 			box-shadow: 5px 0px 10px 0px rgba(0,0,0,0.75);
-			transform: scale(1.15);
+			scale: 1.15;
 		`
-				: `&:hover {
+			: `&:hover {
 				//brighten the color with effects
 				filter: brightness(1);
 				box-shadow: 5px 0px 10px 0px rgba(0,0,0,0.75);
-				transform: scale(1.15);
+				scale: 1.15;
 			}
-		`
-			: ``}
+		`}
 	${(props) =>
 		props.isButton &&
 		`&:active {
-				transform: scale(0.9);
+			scale: 0.9;
 			}
 		`}
-
-
-	//animation opacity with delay
-	animation-fill-mode: forwards;
-	animation-duration: 0.6s;
-	animation-timing-function: ease;
-	animation-iteration-count: 1;
-	animation-direction: normal;
-	animation-play-state: running;
-	animation-name: opacity;
+		
 
 	@keyframes opacity {
 		from {

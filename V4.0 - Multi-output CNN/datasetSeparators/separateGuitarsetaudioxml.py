@@ -19,7 +19,7 @@ if not os.path.exists(CHORD_SAVE_PATH):
 
 
 def save_note():
-    if curr_end_seconds - curr_start_seconds < 0.25:
+    if curr_end_seconds - curr_start_seconds < 0.2:
         # print("Note audio file too short")
         return
     SAVEPATH = f"{NOTE_SAVE_PATH}\\{curr_note}".replace("♯", "#")
@@ -46,7 +46,7 @@ def save_chord():
     E_START_SECONDS = notes_for_chord[0][1]
     E_END_SECONDS = notes_for_chord[-1][2]
 
-    if E_END_SECONDS - E_START_SECONDS < 0.9:
+    if E_END_SECONDS - E_START_SECONDS < 0.5:
         # print("Note audio file too short")
         return
 

@@ -7,9 +7,37 @@ NUMPY_DATASETS = os.path.join(DATASETS, "Numpy")
 MODEL_PATH = os.path.join("autotabModels", "model-out6.h5")
 
 
+class DATASET_UTILS:
+    def createPath(path: str):
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+    def getDatasetsNames():
+        return ["IDMT-SMT-GUITAR_V2", "GuitarSet", "AthosSet"]
+
+
 class CUSTOM_DATASETS:
     path = os.path.join(DATASETS, "Custom")
     none = os.path.join(DATASETS, "Custom", "none")
+
+    class AUGMENTED:
+        path = os.path.join(DATASETS, "Custom", "Augmented")
+
+        class IDMT_SMT_GUITAR_V2:
+            path = os.path.join(DATASETS, "Custom", "Augmented", "IDMT-SMT-GUITAR_V2")
+            chords = os.path.join(
+                DATASETS, "Custom", "Augmented", "IDMT-SMT-GUITAR_V2", "chords"
+            )
+            notes = os.path.join(
+                DATASETS, "Custom", "Augmented", "IDMT-SMT-GUITAR_V2", "notes"
+            )
+
+        class GuitarSet:
+            path = os.path.join(DATASETS, "Custom", "Augmented", "GuitarSet")
+            chords = os.path.join(
+                DATASETS, "Custom", "Augmented", "GuitarSet", "chords"
+            )
+            notes = os.path.join(DATASETS, "Custom", "Augmented", "GuitarSet", "notes")
 
     class IDMT_SMT_GUITAR_V2:
         path = os.path.join(DATASETS, "Custom", "IDMT-SMT-GUITAR_V2")

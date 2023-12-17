@@ -2,6 +2,8 @@ import { useEffect, useReducer, useState } from "react";
 import Tab, { SpecificNotes } from "./TabCanvas";
 import { Container } from "./styled";
 import { useTabViewContext } from "../../contexts/TabViewContext/useTabViewContext";
+import { usePlaybackContext } from "../../contexts/PlaybackContext/usePlaybackContext";
+
 
 interface TabViewI {
     windowSize: { width: number, height: number }
@@ -9,88 +11,48 @@ interface TabViewI {
 
 const TabView = (props: TabViewI) => {
     const { windowSize } = props
-    const { activatedNotes, frets, updateActivatedNotes, activatedChords, updateActivatedChords, updateSpeed, showNotes } = useTabViewContext()
-    const [timedActivatedNotes, setTimedActivatedNotes] = useState<SpecificNotes[]>([])
+    const { activeAudioEvents } = useTabViewContext()
     const [timedActivatedChords, setTimedActivatedChords] = useState<SpecificNotes[]>([])
+    const [aniIndex, setAnimationIndex] = useState<number>(0)
+    const { stopPredict, Predict, } = usePlaybackContext()
+
 
     useEffect(() => {
-        //console.log(activatedNotes)
-        if (activatedNotes.animationStart) {
-            updateActivatedNotes({
-                animationIndex: 0,
-                animationStart: false
-            })
-
-            return
+        if (activeAudioEvents.length > 0) {
+            Predict.show ?
+                setTimedActivatedChords(activeAudioEvents[aniIndex ? aniIndex - 1 : 0].indexes)
+                :
+                setTimedActivatedChords([])
         }
-
-        if (activatedNotes.animate && activatedNotes.indexes.length) {
-            if (activatedNotes.animationIndex && activatedNotes.animationIndex >= activatedNotes.indexes.length) {
-                updateActivatedNotes({
-
-                    animate: activatedNotes.loop ?? false,
-                    //show: true,
-                })
-            }
-            else {
-                setTimedActivatedNotes([activatedNotes.indexes[activatedNotes.animationIndex ?? 0]])
-                setTimeout(() => {
-                    updateActivatedNotes({
-                        animationIndex: (activatedNotes.animationIndex ?? 0) + 1,
-                        //show: true,
-                    })
-                }, updateSpeed);
-            }
-
-        }
-        else if (activatedNotes.show) {
-            setTimedActivatedNotes(activatedNotes.indexes)
-        }
-        else {
-            setTimedActivatedNotes([])
-        }
-    }, [activatedNotes])
+    }, [Predict.show, activeAudioEvents.length])
 
     useEffect(() => {
-        const activatedChord = activatedChords.notesData[activatedChords.animationIndex ?? 0]
-
-        if (activatedChords.animationStart) {
-            updateActivatedChords({
-                animationIndex: 0,
-                animationStart: false
-            })
-
-            return
-        }
-        if (activatedChords.animate && activatedChord.indexes.length) {
-
-            if (activatedChords.animationIndex && activatedChords.animationIndex >= activatedChord.indexes.length) {
-                updateActivatedChords({
-                    animate: activatedChords.loop ?? false,
-                    show: true,
-                })
+        if (Predict.playing) {
+            let animationIndex = aniIndex
+            if (aniIndex == activeAudioEvents.length) {
+                setAnimationIndex(0)
+                animationIndex = 0
             }
-            else {
-                setTimedActivatedChords(activatedChord.indexes)
+
+            setTimeout(() => {
+                const activatedChord = activeAudioEvents[animationIndex]
+                if (animationIndex === activeAudioEvents.length - 1) {
+
+                    if (Predict.loop) setAnimationIndex(0)
+                    else {
+                        stopPredict()
+                    }
+                }
+
+                setTimedActivatedChords([])
                 setTimeout(() => {
-                    updateActivatedChords({
-                        animationIndex: (activatedChords.animationIndex ?? 0) + 1,
-                        show: true,
-                    })
-                }, updateSpeed);
-            }
+                    setTimedActivatedChords(activatedChord.indexes)
+                }, 100)
 
-
+                setAnimationIndex(animationIndex + 1)
+            }, Predict.updateSpeed);
         }
-        else if (activatedChords.show) {
-            setTimedActivatedChords(activatedChord.indexes)
-        }
-        else {
-            setTimedActivatedChords([])
-        }
-
-
-    }, [activatedChords])
+    }, [Predict.playing, aniIndex])
 
     return (
         <Container>
@@ -99,7 +61,7 @@ const TabView = (props: TabViewI) => {
                     width: windowSize.width
                 }}
                 findBy="index"
-                activatedNotes={showNotes ? timedActivatedNotes : timedActivatedChords} />
+                activatedNotes={timedActivatedChords} />
         </Container>
     );
 };

@@ -1,18 +1,15 @@
 from utils.audio.load_prepare import Prepare
 import numpy as np
-
-LABELS = np.load("np_ds-transposed-new/unique_labels-6out.npy")
+from keras.losses import BinaryCrossentropy, BinaryFocalCrossentropy
 
 """ 
 after 60% of time btween onsets gone through, start to predict the notes and save the ones with the higher overall confidence
 """
 
 
-def predict_notes(MODEL, audio_window):
+def predict_notes(MODEL, audio_window, LABELS):
     MODEL_PREDICT = MODEL.predict(
-        audio_window.reshape(
-            1, audio_window.shape[0], audio_window.shape[1], audio_window.shape[2]
-        ),
+        audio_window.reshape(1, audio_window.shape[0], audio_window.shape[1], 1),
         verbose=0,
     )
 
@@ -20,7 +17,7 @@ def predict_notes(MODEL, audio_window):
     sum_of_confidence = 0
     for i, pred in enumerate(MODEL_PREDICT):
         confidence = np.max(pred) * 100
-        if confidence > 40:
+        if confidence > 30:
             note = LABELS[i]
             sum_of_confidence += confidence
             "save the notes"
@@ -35,7 +32,7 @@ def predict_notes(MODEL, audio_window):
     return notes_preds, sum_of_confidence
 
 
-def audio_window(AUDIO, ONSETS, SR, MODEL, MaxSteps=None):
+def audio_window(AUDIO, ONSETS, SR, MODEL, LABELS, MaxSteps=None, transpose=True):
     ONSETS_SEC, ONSETS_SR = ONSETS
     AUDIO_WIN_ACCOMULATE_LEN = int(0.1 * SR)
     AUDIO_WIN_ACCOMULATE_LEN_SEC = 0.1  # 0.1 seconds
@@ -76,9 +73,9 @@ def audio_window(AUDIO, ONSETS, SR, MODEL, MaxSteps=None):
             audio_window = Prepare(
                 AUDIO[audio_w_start:audio_w_end],
                 sample_rate=SR,
-                transpose=True,
+                transpose=transpose,
             )
-            notes_preds, general_confidence = predict_notes(MODEL, audio_window)
+            notes_preds, general_confidence = predict_notes(MODEL, audio_window, LABELS)
 
             if len(notes_preds) == 0:
                 audio_w_end += AUDIO_WIN_ACCOMULATE_LEN

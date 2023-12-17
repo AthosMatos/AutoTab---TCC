@@ -103,7 +103,7 @@ def prepareJams(jams_file_path):
 
     def findHarmonics():
         def save_note(nt, start, end):
-            if end - start < 0.25:
+            if end - start < 0.2:
                 # print("Note audio file too short")
                 return
 
@@ -128,7 +128,7 @@ def prepareJams(jams_file_path):
             # print(curr_note)
 
         def save_chord(nts, start, end):
-            if end - start < 0.9:
+            if end - start < 0.5:
                 # print("Chord audio file too short")
                 return
 
@@ -220,7 +220,7 @@ def prepareJams(jams_file_path):
                         }
                     ) """
 
-            if next_start_time - curr_start_time <= 0.05:
+            if next_start_time - curr_start_time <= 0.03:
                 if len(harmonics) == 0:
                     harmonics.extend(
                         [

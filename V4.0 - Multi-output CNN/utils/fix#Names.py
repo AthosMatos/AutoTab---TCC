@@ -1,4 +1,4 @@
-from paths import CUSTOM_DATASETS
+from utils.paths import CUSTOM_DATASETS
 import os
 
 # some of the folders in the dataset contain the hash

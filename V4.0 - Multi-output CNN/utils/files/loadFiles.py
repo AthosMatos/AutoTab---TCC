@@ -2,11 +2,13 @@ import os
 import numpy as np
 
 
-def getFilesPATHS(path: str, extension=".wav"):
+def getFilesPATHS(path: str, ignores: list[str] = None, extension=".wav"):
     paths = []
     for DIRS, _, files in os.walk(path):
         for file in files:
             if file.endswith(extension):
+                if any(x in DIRS for x in ignores):
+                    continue
                 paths.append(os.path.join(DIRS, file))
     return np.array(paths)
 
