@@ -18,10 +18,11 @@ def main():
     # MUSICTESTPATH = RAW_DATASETS.path + "/musics/beach house - clean.wav"
     # MUSICTESTPATH = RAW_DATASETS.path + "/musics/my bron-yr-aur.mp3"
     # MUSICTESTPATH = RAW_DATASETS.path + "/musics/TEST SONG.wav"
+    MUSICTESTPATH = RAW_DATASETS.path + "/musics/simple notes test.wav"
     # MUSICTESTPATH = RAW_DATASETS.path + "/musics/fastnotestSeq.wav"
     # MUSICTESTPATH = RAW_DATASETS.path + "/musics/riffs test.wav"
     # MUSICTESTPATH = RAW_DATASETS.path + "/musics/riff test 3 notes.wav"
-    MUSICTESTPATH = "output.wav"
+    # MUSICTESTPATH = "output.wav"
 
     """
     riff test notes in riff
@@ -39,9 +40,9 @@ def main():
         AUDIO,
         SR,
         (ONSETS_SECS, ONSETS_SRS),
-        MaxSteps=20,
+        MaxSteps=40,
         giveMoreAudioContext=False,  # experimental, incrases the end of the audio to get more context
-        # justNotes=True,
+        justNotes=True,
     )
 
 

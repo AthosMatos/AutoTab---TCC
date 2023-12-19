@@ -11,6 +11,7 @@ import { ShowButton } from "../../components/Buttons/Show"
 import { LoopButton } from "../../components/Buttons/Loop"
 import { PredictButtonsContainer } from "../../components/Buttons"
 import Recorder from "../../Recorder/src/recorder"
+import useAudioRecorder from "../../hooks/useAudioRecorder"
 
 const SeqTest3 = [
     "D6",
@@ -36,77 +37,41 @@ const MainPage = () => {
     const chords = AudioEventAnalyser(SeqTest3, allNotesFromFrets, frets)
     const { updatePredictSpeed } = usePlaybackContext()
     const { connect, isConnected, send } = useWebSocket()
-
-    const startRecording = async () => {
-        const micStream = await navigator.mediaDevices.getUserMedia({ audio: true, });
-        const audioContext = new (window.AudioContext)({
-            ///sampleRate: 48000,
-            latencyHint: 'interactive'
-        });
-        const gainNode = audioContext.createGain();
-        gainNode.gain.value = 2;
-
-        //compressor.connect(audioContext.destination);
-        let source = audioContext.createMediaStreamSource(micStream);
-        source.channelInterpretation = 'discrete';
-        source.channelCountMode = 'explicit';
-        source.channelCount = 2;
-        source.connect(gainNode);
-
-        // Create a Recorder object
-        let recorder = new Recorder(source);
-
-        recorder.record();
-
-        // Stop recording after 1 second
-        setTimeout(function () {
-            recorder.stop();
-
-            // Export the recording to a WAV file
-            recorder.exportWAV(async function (blob: Blob) {
+    const { startRecording, stopRecording, audioData } = useAudioRecorder()
 
 
-                // Convert the Blob to ArrayBuffer
-                const arrayBuffer = await blob.arrayBuffer();
 
-                // Convert the ArrayBuffer to base64
-                function arrayBufferToBase64(arrayBuffer: ArrayBuffer): string {
-                    // Convert the ArrayBuffer to a binary string
-                    let binaryString = '';
-                    const bytes = new Uint8Array(arrayBuffer);
-                    const length = bytes.byteLength;
 
-                    for (let i = 0; i < length; i++) {
-                        binaryString += String.fromCharCode(bytes[i]);
-                    }
+    /* useEffect(() => {
+        if (audioBlob && wavArrayBuffer) {
+            // convert to base64
+            function arrayBufferToBase64(arrayBuffer: ArrayBuffer): string {
+                // Convert the ArrayBuffer to a binary string
+                let binaryString = '';
+                const bytes = new Uint8Array(arrayBuffer);
+                const length = bytes.byteLength;
 
-                    // Convert the binary string to a Base64 string
-                    return btoa(binaryString);
+                for (let i = 0; i < length; i++) {
+                    binaryString += String.fromCharCode(bytes[i]);
                 }
 
-                // Example usage
+                // Convert the binary string to a Base64 string
+                return btoa(binaryString);
+            }
 
-                const base64String = arrayBufferToBase64(arrayBuffer);
-
-
-
-
-                // Send the data through the WebSocket
-                // Replace 'your-websocket-server-url' with your actual WebSocket server URL
-
-                send({ data: blob })
-
-                let url = URL.createObjectURL(blob);
-                let a = document.createElement('a');
-                a.href = url;
-                a.download = 'test.wav';
-                a.click();
-            });
-        }, 3500);
-
-    };
+            // Example usage
+            const base64String = arrayBufferToBase64(wavArrayBuffer);
 
 
+            send({ data: base64String })
+
+            let url = URL.createObjectURL(audioBlob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = 'test.wav';
+            a.click();
+        }
+    }, [audioBlob, wavArrayBuffer]); */
 
     useEffect(() => {
         connect('ws://localhost:50007')
@@ -141,8 +106,21 @@ const MainPage = () => {
         }}>
 
             <button onClick={startRecording}>Start Recording</button>
-            {/*  <button onClick={stopRecording}>Stop Recording</button>
-            <button onClick={playAudio} disabled={!audioUrl}>
+            <button onClick={() => {
+                stopRecording()
+                const audioFlat: any[] = []
+                audioData?.forEach((data) => {
+                    data.forEach((d: any) => {
+                        audioFlat.push(d)
+                    })
+                })
+
+                //console.log(timer)
+                console.log(audioFlat.length / 44100)
+                send({ data: audioFlat }, true)
+                console.log(audioFlat)
+            }}>Stop Recording</button>
+            {/* <button onClick={playAudio} disabled={!audioUrl}>
                 Play Audio
             </button> */}
 

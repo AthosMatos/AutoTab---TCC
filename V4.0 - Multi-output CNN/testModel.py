@@ -21,8 +21,8 @@ model = load_model("Models/model_chords.h5")
 spec, _ = loadAndPrepare(
     path,
     sample_rate=44100,
-    # audio_limit_sec=(0.38, 0.8),
-    audio_limit_sec=(1.23, 2.43),
+    audio_limit_sec=(0.38, 0.8),
+    # audio_limit_sec=(1.23, 2.43),
     # audio_limit_sec=(1.82, 2.12),
     # audio_limit_sec=(2.05, 2.36),
     # audio_limit_sec=(1.5, 1.7),

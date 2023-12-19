@@ -9,7 +9,7 @@ interface WebsocketProviderI {
 interface WebsocketContextI {
 	connect: (url: string) => void;
 	getWebSocket: () => Websocket;
-	send: (message: MsgT) => void;
+	send: (message: MsgT, asJson?: boolean) => void;
 	isConnected: boolean;
 }
 

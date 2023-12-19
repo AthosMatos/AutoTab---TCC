@@ -178,6 +178,7 @@ def audio_window(
             else:
                 print(f"|| Chords ||")
             print(f"|| {best_pred[1]:.2f}% ||")
+
             for note, confidence in best_pred[0]:
                 print(f"|| {note} - {confidence:.2f}% ||")
 

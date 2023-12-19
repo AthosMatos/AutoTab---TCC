@@ -1,6 +1,10 @@
 from keras.models import load_model
 import numpy as np
-from utils.audio.load_prepare import loadAndPrepare
+from utils.audio.load_prepare import loadAndPrepare, load
+
+audio, sr = load("test.wav")
+print(audio.shape, sr)
+exit()
 
 unique_labels = np.load("np_ds-transposed-new/unique_labels-6out.npy")
 
