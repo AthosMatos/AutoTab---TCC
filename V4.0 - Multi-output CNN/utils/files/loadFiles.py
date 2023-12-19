@@ -2,14 +2,28 @@ import os
 import numpy as np
 
 
-def getFilesPATHS(path: str, ignores: list[str] = None, extension=".wav"):
+def getFilesPATHS(
+    path: str,
+    ignores: list[str] = None,
+    extension=".wav",
+    randomize=False,
+    maxFiles=None,
+):
     paths = []
     for DIRS, _, files in os.walk(path):
         for file in files:
             if file.endswith(extension):
-                if any(x in DIRS for x in ignores):
-                    continue
+                if ignores is not None and ignores.__len__() > 0:
+                    if any(x in DIRS for x in ignores):
+                        continue
                 paths.append(os.path.join(DIRS, file))
+
+    if randomize:
+        np.random.shuffle(paths)
+
+    if maxFiles is not None:
+        paths = paths[:maxFiles]
+
     return np.array(paths)
 
 

@@ -5,3 +5,8 @@
 #ignore dataset path
 *Datasets/
 *__pycache__/
+*.npz
+*chords_np_cqt_44.1k/
+*mix_np_cqt_44.1k/
+*notes_np_cqt_44.1k/
+V4.0 - Multi-output CNN/notes_np_cqt_44.1k/train_ds-6out.npz

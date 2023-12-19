@@ -2,8 +2,7 @@ from multiprocessing import Manager, Process, cpu_count
 import os
 from typing import List
 from utils.audio.load_prepare import loadAndPrepare
-from utils.notes import genNotes, genNotes_v2
-import tensorflow as tf
+from utils.notes import genNotes_v2
 import numpy as np
 from utils.paths import CUSTOM_DATASETS
 
@@ -13,10 +12,10 @@ GUITAR_NOTES = genNotes_v2("C2", "A6")
 
 np.save(f"all_labels.npy", GUITAR_NOTES)
 
-
-outPath = "chords_np_cqt_44.1k"
+notes = True
+outPath = "notes_np_cqt_44.1k"
 sampleRate = 44100
-ignore = ["notes", "Augmented"]
+ignore = ["chords"]
 
 
 def printConfig():
@@ -177,13 +176,7 @@ def load_from_path(
     #
     for index, path in enumerate(PATHS):
         # spec, sr = loadAndPrepare(path)
-        audio, _ = loadAndPrepare(
-            path,
-            sample_rate=sampleRate,
-            expand_dims=True,
-            pad=True,
-            transpose=False,
-        )
+        audio, _ = loadAndPrepare(path, sample_rate=sampleRate, notes=notes)
 
         loaded_audios.append(audio)
         loaded_labels.append(LABELS[index])

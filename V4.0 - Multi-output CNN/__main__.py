@@ -8,46 +8,40 @@ import numpy as np
 
 """ 
 obs:
-misssing training data of harmonics in the high frets
-record some power chords and aplly data aug to them
-Athosset has some audios that end and the file continues with silence, remove it
+so far the best model dataset has been the one without the notes augmentation, tryng now
+with augmentation
 """
-
-sr = 44100
-
-LABELS = np.load("all_labels.npy")
 
 
 def main():
-    MUSICTESTPATH = RAW_DATASETS.path + "/musics/g chord.wav"
+    # MUSICTESTPATH = RAW_DATASETS.path + "/musics/g chord.wav"
     # MUSICTESTPATH = RAW_DATASETS.path + "/musics/beach house - clean.wav"
+    # MUSICTESTPATH = RAW_DATASETS.path + "/musics/my bron-yr-aur.mp3"
+    # MUSICTESTPATH = RAW_DATASETS.path + "/musics/TEST SONG.wav"
     # MUSICTESTPATH = RAW_DATASETS.path + "/musics/fastnotestSeq.wav"
     # MUSICTESTPATH = RAW_DATASETS.path + "/musics/riffs test.wav"
+    # MUSICTESTPATH = RAW_DATASETS.path + "/musics/riff test 3 notes.wav"
+    MUSICTESTPATH = "output.wav"
 
     """
     riff test notes in riff
     1- A2 E3 A3
     2- D3 A3 D4
     3 - E3 B3 E4
-
+    
+    beach notes 
+    D3 G3 A3 C4 A3 C4 D4 E4 G4 C4 D4 D4 D#4 A3 C4 A3 D3 G3 A3 C4 A3
     """
-
-    AUDIO, SR = load(MUSICTESTPATH, seconds_limit=(0, 15), sample_rate=sr)
-    # print(AUDIO)
-    """ plt.plot(AUDIO)
-    plt.show() """
+    SR = 44100
+    AUDIO, _ = load(MUSICTESTPATH, sample_rate=SR)
     ONSETS_SECS, ONSETS_SRS = get_onsets(AUDIO, SR)
-    # model = load_model("Models/model-out-6-Adam-bigDS.h5")
-    model = load_model("Models/model_chords.h5")
-    # model = load_model("Models/bestModel_stft_16k.h5")
     audio_window(
         AUDIO,
-        (ONSETS_SECS, ONSETS_SRS),
         SR,
-        model,
-        LABELS=LABELS,
+        (ONSETS_SECS, ONSETS_SRS),
         MaxSteps=20,
-        transpose=False,
+        giveMoreAudioContext=False,  # experimental, incrases the end of the audio to get more context
+        # justNotes=True,
     )
 
 

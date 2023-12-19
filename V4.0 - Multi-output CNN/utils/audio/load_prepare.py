@@ -3,10 +3,8 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 from utils.audio.rmsNorm import rmsNorm
 import sys
-from sklearn.preprocessing import normalize, minmax_scale
-from python_speech_features import mfcc
-import tensorflow as tf
-import keras
+from sklearn.preprocessing import minmax_scale
+from keras.layers import Resizing
 
 if not sys.warnoptions:
     import warnings
@@ -66,60 +64,55 @@ D = standardize(np.squeeze(D, -1)) """
 """ test identification with padding and with resizing """
 
 
-def Prepare(
-    audio,
-    sample_rate,
-    expand_dims=True,
-    transpose=True,
-    pad=True,
-):
-    # audio = librosa.effects.harmonic(y=audio, margin=18)
+def Prepare(audio, sample_rate, notes=True):
+    audio = librosa.effects.harmonic(y=audio, margin=8)  # best so far for chords
 
-    """
-    when using this method dont use batch norm in the model
-    """
-
-    audio = rmsNorm(audio, -50)
     D = librosa.amplitude_to_db(
         np.abs(
             librosa.cqt(
                 y=audio,
                 sr=sample_rate,
-                fmin=librosa.note_to_hz("C1"),
-                n_bins=120,
-                bins_per_octave=14,
+                fmin=librosa.note_to_hz("C2"),  # best so far
+                # n_bins=42,
+                # bins_per_octave=14,
                 # n_fft=256,
-                # hop_length=256
+                # hop_length=2048
                 # sr=sample_rate,
-                # bins_per_octave=12,
+                # bins_per_octave=6,
                 # hop_length=256,
             )
         ),
         ref=np.max,
     )
 
-    if D.shape[1] < 216:
+    D = np.expand_dims(D, -1)
+    if notes:
+        D = Resizing(32, 32)(D)
+    else:
+        D = Resizing(128, 128)(D)
+    D = np.expand_dims(minmax_scale(np.squeeze(D, -1)), -1)
+    """ if D.shape[1] < 216:
         D = np.pad(
             D, ((0, 0), (0, 216 - D.shape[1])), "constant", constant_values=np.min(D)
         )
     else:
         D = D[:, 0:216]
-
-    D = minmax_scale(D)
-    D = np.expand_dims(D.T, -1)
-    # D = standardize(D)
-    # D = normalize(D, axis=0)
-    # print(f"min: {np.min(D)} max: {np.max(D)}")
+ """
     return D
 
 
 def load(path, seconds_limit=(None, None), sample_rate=None):
+    sec_start, sec_end = seconds_limit
+
+    if sec_start and sec_end:
+        sec_end = sec_end - sec_start
+
     audio, sample_rate = librosa.load(
         path,
         mono=True,
         sr=sample_rate,
-        offset=seconds_limit[0],
-        duration=seconds_limit[1],
+        offset=sec_start,
+        duration=sec_end,
     )
 
     return audio, sample_rate
@@ -129,13 +122,11 @@ def loadAndPrepare(
     path,
     audio_limit_sec=(None, None),
     sample_rate=None,
-    expand_dims=True,
-    transpose=False,
-    pad=True,
+    notes=True,
 ):
     audio, sample_rate = load(path, audio_limit_sec, sample_rate)
 
-    S = Prepare(audio, sample_rate, expand_dims, transpose, pad)
+    S = Prepare(audio, sample_rate, notes)
 
     return S, sample_rate
 

@@ -3,56 +3,39 @@ import numpy as np
 from utils.audio.load_prepare import loadAndPrepare
 from utils.paths import CUSTOM_DATASETS, RAW_DATASETS
 
-""" 
-
-train_ds, unique_labels = (
-    np.load("chords_np_cqt_44.1k/train_ds-6out.npz"),
-    np.load("all_labels.npy"),
-)
-
-print(train_ds["x"].shape)
-print(train_ds["y"].shape)
-print(unique_labels) 
-
-"""
-
-# path = RAW_DATASETS.path + "/musics/riffs test.wav"
-# path = RAW_DATASETS.AthosSet + "/chords/CMajor/CHORD - C Major 03.wav"
-model = load_model("Models/model_chords.h5")
-
-# model.summary()
-
 unique_labels = np.load("all_labels.npy")
-# unique_labels = np.load("np_ds-cqt-minmax-44100/unique_labels-6out.npy")
 
-
-""" DMAJOR
-|| D3 ||
-|| A3 ||
-|| D4 ||
-|| F#4 ||
+# path = RAW_DATASETS.path + "/musics/g chord.wav"
+# path = RAW_DATASETS.path + "/musics/beach house - clean.wav"
+path = RAW_DATASETS.path + "/musics/riffs test.wav"
 """
-path = RAW_DATASETS.path + "/musics/g chord.wav"
+    riff test notes in riff
+    1- A2 E3 A3
+    2- D3 A3 D4
+    3 - E3 B3 E4
+"""
+
+model = load_model("Models/model_chords.h5")
+# model = load_model("Models/model_notes.h5")
+
 spec, _ = loadAndPrepare(
     path,
     sample_rate=44100,
-    transpose=False,
-    expand_dims=True,
-    pad=True,
-    # audio_limit_sec=(0.38, 0.8)
-    # audio_limit_sec=(1.20, 1.40)
-    # audio_limit_sec=(1.80, 2.05)
-    # audio_limit_sec=(0, 2.5),
+    # audio_limit_sec=(0.38, 0.8),
+    audio_limit_sec=(1.23, 2.43),
+    # audio_limit_sec=(1.82, 2.12),
+    # audio_limit_sec=(2.05, 2.36),
+    # audio_limit_sec=(1.5, 1.7),
+    notes=False,
 )
 
 
 y_pred = model.predict(spec.reshape(1, spec.shape[0], spec.shape[1], 1))
 
-# print(y_pred)
-
 for i, pred in enumerate(y_pred):
     confidence = np.max(pred) * 100
-    if confidence > 30:
+    if confidence > 50:
         print(f"|| {unique_labels[i]} - {confidence:.2f}% ||")
+
     """ print(np.argmax(pred))
     print(unique_labels[np.argmax(pred)]) """
