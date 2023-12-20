@@ -28,18 +28,44 @@ const useAudioRecorder = () => {
         //return () => clearInterval(intervalId);
     }, [streamStreaming]);
 
-
+    const downsampleBuffer = (buffer: Float32Array, sampleRate: number, outSampleRate: number): ArrayBuffer => {
+        if (outSampleRate === sampleRate) {
+            return buffer.buffer;
+        }
+        if (outSampleRate > sampleRate) {
+            throw new Error('downsampling rate should be smaller than the original sample rate');
+        }
+        const sampleRateRatio = sampleRate / outSampleRate;
+        const newLength = Math.round(buffer.length / sampleRateRatio);
+        const result = new Int16Array(newLength);
+        let offsetResult = 0;
+        let offsetBuffer = 0;
+        while (offsetResult < result.length) {
+            const nextOffsetBuffer = Math.round((offsetResult + 1) * sampleRateRatio);
+            let accum = 0;
+            let count = 0;
+            for (let i = offsetBuffer; i < nextOffsetBuffer && i < buffer.length; i++) {
+                accum += buffer[i];
+                count++;
+            }
+            result[offsetResult] = Math.min(1, accum / count) * 0x7fff;
+            offsetResult++;
+            offsetBuffer = nextOffsetBuffer;
+        }
+        return result.buffer;
+    };
     const handleSuccess = (stream: MediaStream) => {
         globalStream.current = stream;
         input.current = context.current!.createMediaStreamSource(stream);
         input.current.connect(processor.current!);
         processor.current!.onaudioprocess = (e) => {
             const left = e.inputBuffer.getChannelData(0);
+            const left16 = downsampleBuffer(left, 44100, 16000);
             setAudioData((prev) => {
                 if (prev) {
-                    return [...prev, left]
+                    return [...prev, left16]
                 } else {
-                    return [left]
+                    return [left16]
                 }
             })
 
