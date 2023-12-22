@@ -22,13 +22,15 @@ from keras.layers import (
 import numpy as np
 from keras.preprocessing.text import Tokenizer
 from utils.notes import genNotes_v2
+import matplotlib.pyplot as plt
 
-train_ds = np.load("10.51 - 14.51.npz")
+train_ds = np.load("seq2seqNpy.npz")
 GUITAR_NOTES = genNotes_v2("F#1", "A6")
 
 X = train_ds["X"]
 y_notes = train_ds["y_notes"]
 y_times = train_ds["y_times"]
+
 
 print(X.shape)
 print(y_notes.shape)
@@ -44,21 +46,26 @@ note_tokenizer = note_tokenizer.word_index
 # define mode
 inputs = Input(shape=(X.shape[1], X.shape[2], X.shape[3]))
 
-""" x = TimeDistributed(Conv1D(32, 3))(inputs)
-x = TimeDistributed(BatchNormalization())(x)
-x = TimeDistributed(Activation("relu"))(x)
+""" x = TimeDistributed(Conv1D(32, 3, activation="relu"))(inputs)
+#x = TimeDistributed(BatchNormalization())(x)
+#x = TimeDistributed(Activation("relu"))(x)
 x = TimeDistributed(MaxPooling1D())(x)
 
-x = TimeDistributed(Conv1D(64, 3))(x)
-x = TimeDistributed(BatchNormalization())(x)
-x = TimeDistributed(Activation("relu"))(x)
-x = TimeDistributed(MaxPooling1D())(x) 
+x = TimeDistributed(Conv1D(64, 3, activation="relu"))(x)
+#x = TimeDistributed(BatchNormalization())(x)
+#x = TimeDistributed(Activation("relu"))(x)
+x = TimeDistributed(MaxPooling1D())(x)
 
-best one so far without batch normalization
+x = TimeDistributed(Conv1D(128, 3, activation="relu"))(x)
+#x = TimeDistributed(BatchNormalization())(x)
+#x = TimeDistributed(Activation("relu"))(x)
+x = TimeDistributed(MaxPooling1D())(x) """
 
+""" 
 """
+
 # x = MaxPooling2D(strides=(2, 2))(x)
-x = Conv2D(32, 3, activation="relu")(inputs)
+""" x = Conv2D(32, 3, activation="relu")(inputs)
 x = MaxPooling2D()(x)
 
 x = Conv2D(64, 3, activation="relu")(x)
@@ -66,14 +73,15 @@ x = MaxPooling2D()(x)
 
 x = Conv2D(128, 3, activation="relu")(x)
 x = MaxPooling2D()(x)
-
+ """
 # x = Dropout(0.2)(x)
-""" x = TimeDistributed(Conv1D(32, 3, activation="relu"))(inputs)
+# best one so far without batch normalization
+x = TimeDistributed(Conv1D(32, 3, activation="relu"))(inputs)
 x = TimeDistributed(MaxPooling1D())(x)
 x = TimeDistributed(Conv1D(64, 3, activation="relu"))(x)
 x = TimeDistributed(MaxPooling1D())(x)
 x = TimeDistributed(Conv1D(128, 3, activation="relu"))(x)
-x = TimeDistributed(MaxPooling1D())(x) """
+x = TimeDistributed(MaxPooling1D())(x)
 
 x = TimeDistributed(Flatten())(x)
 
@@ -125,12 +133,22 @@ plot_model(model, to_file="model_plot.png", show_shapes=True, show_layer_names=T
 
 model.fit(X, [y_notes, y_times], epochs=220, verbose=2)
 
+####################test model#######################
 
-# demonstrate prediction
-yhat = model.predict(
-    X[0].reshape(1, X[0].shape[0], X[0].shape[1], X[0].shape[2]), verbose=1
+x_index = 14
+
+X_test = X[x_index].reshape(
+    1, X[x_index].shape[0], X[x_index].shape[1], X[x_index].shape[2]
 )
 
+print(X_test.shape)
+
+plt.imshow(X[x_index, :, :, 0])
+plt.show()
+
+isTest = True
+# demonstrate prediction
+yhat = model.predict(X_test, verbose=1)
 
 notes_pred_i = 0
 # print(yhat[notes_pred_i].shape)
@@ -139,27 +157,38 @@ times_pred_i = 1
 
 # print(yhat[notes_pred_i])
 
-for i, pred in enumerate(yhat[notes_pred_i][0]):
+if isTest:
+    comp_index = 0
+else:
+    comp_index = x_index
+
+
+for i, pred in enumerate(yhat[notes_pred_i][comp_index]):
     pred_index = np.argmax(pred)
-    true_index = np.argmax(y_notes[0][i])
-    if pred_index > 0 and true_index > 0:
-        print("----")
+    true_index = np.argmax(y_notes[x_index][i])
+    if pred_index > 0:
+        print("Pred", end="----")
         # print pred and true note
         print(
             list(note_tokenizer.keys())[
                 list(note_tokenizer.values()).index(pred_index)
             ],
-            end=" ",
+            end="----",
         )
+    if true_index > 0:
+        print(f"True", end="----")
         print(
             list(note_tokenizer.keys())[list(note_tokenizer.values()).index(true_index)]
         )
 
 
-for i, pred in enumerate(yhat[times_pred_i][0]):
+for i, pred in enumerate(yhat[times_pred_i][comp_index]):
     time_in = pred[0]
     time_out = pred[1]
 
-    if time_in and time_out > 0:
+    if time_in > 0:
+        print(f"Pred", end="----")
         print(f"{time_in:.2f} - {time_out:.2f}", end=" --- ")
-        print(f"{y_times[0][i][0]:.2f} - {y_times[0][i][1]:.2f}")
+    if time_out > 0:
+        print(f"True", end="----")
+        print(f"{y_times[x_index][i][0]:.2f} - {y_times[x_index][i][1]:.2f}")

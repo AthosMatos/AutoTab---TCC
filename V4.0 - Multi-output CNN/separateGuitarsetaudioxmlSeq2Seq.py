@@ -137,7 +137,7 @@ for XMLFILE in XMLFILES:
             ) = get_seconds_samples_note(event)
 
             if curr_secs < 4:
-                # print(curr_note, curr_start_seconds, curr_end_seconds)
+                print(curr_note, curr_start_seconds, curr_end_seconds)
                 y_notes.append(curr_note)
                 y_times.append([curr_start_seconds, curr_end_seconds])
                 save_end = curr_start_seconds
