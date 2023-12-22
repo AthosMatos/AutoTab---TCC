@@ -89,21 +89,30 @@ out_notes = TimeDistributed(Dense(256, activation="relu"))(x)
 out_notes = TimeDistributed(Dense(128, activation="relu"))(out_notes)
 out_notes = TimeDistributed(Dense(84, activation="relu"))(out_notes)
 # out_notes = TimeDistributed(Dropout(0.5))(out_notes)
-out_notes = TimeDistributed(Dense(notes_outs_len, activation="softmax"))(out_notes)
+out_notes = TimeDistributed(
+    Dense(notes_outs_len, activation="softmax"), name="notes_output"
+)(out_notes)
 
 out_times = TimeDistributed(Dense(256, activation="relu"))(x)
 out_times = TimeDistributed(Dense(128, activation="relu"))(out_times)
 out_times = TimeDistributed(Dense(64, activation="relu"))(out_times)
 # out_times = TimeDistributed(Dropout(0.5))(out_times)
-out_times = TimeDistributed(Dense(2))(out_times)
+out_times = TimeDistributed(Dense(2), name="times_output")(out_times)
 
 
 model = Model(inputs=inputs, outputs=[out_notes, out_times])
-
+metrics = {
+    "notes_output": "categorical_accuracy",  # Adjust based on your task
+    "times_output": "mae",  # Mean Absolute Error
+}
+losses = {
+    "notes_output": "categorical_crossentropy",  # Adjust based on your task
+    "times_output": "mean_squared_error",  # Mean Squared Error
+}
 model.compile(
     optimizer=Adam(learning_rate=0.001),
-    loss=["categorical_crossentropy", "mse"],  # 'mse
-    metrics=["accuracy", "mae"],
+    loss=losses,  # 'mse
+    metrics=metrics,
 )
 # fit model
 
