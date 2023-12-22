@@ -54,6 +54,16 @@ class CUSTOM_DATASETS:
     none = os.path.join(DATASETS, "Custom", "none") """
 
 
+class SEQ2SEQ:
+    path = os.path.join(DATASETS, "Seq2Seq")
+
+    class Frag:
+        path = os.path.join(DATASETS, "Seq2Seq", "Frag")
+
+    class Full:
+        path = os.path.join(DATASETS, "Seq2Seq", "Full")
+
+
 class RAW_DATASETS:
     path = os.path.join(DATASETS, "Raw")
     AthosSet = os.path.join(DATASETS, "Raw", "AthosSet")

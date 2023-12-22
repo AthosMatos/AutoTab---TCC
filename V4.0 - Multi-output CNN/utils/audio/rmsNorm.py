@@ -1,6 +1,7 @@
 import numpy as np
 
-def rmsNorm(S, level=-70.0):
+
+def rmsNorm(S, level=-50.0):
     rms_level = level
     # linear rms level and scaling factor
     r = 10 ** (rms_level / 10.0)

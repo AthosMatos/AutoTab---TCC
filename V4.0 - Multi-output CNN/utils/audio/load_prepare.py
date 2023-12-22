@@ -5,6 +5,7 @@ from utils.audio.rmsNorm import rmsNorm
 import sys
 from sklearn.preprocessing import minmax_scale
 from keras.layers import Resizing
+import tensorflow as tf
 
 if not sys.warnoptions:
     import warnings
@@ -64,33 +65,25 @@ D = standardize(np.squeeze(D, -1)) """
 """ test identification with padding and with resizing """
 
 
-def Prepare(audio, sample_rate, notes=True):
-    audio = librosa.effects.harmonic(y=audio, margin=8)  # best so far for chords
+def Prepare(
+    audio, sample_rate, Resize=None, expand_dims=True, amp_to_db=True, minmax=True
+):
+    # audio = librosa.effects.harmonic(audio, margin=8)  # best so far for chords
 
-    D = librosa.amplitude_to_db(
-        np.abs(
-            librosa.cqt(
-                y=audio,
-                sr=sample_rate,
-                fmin=librosa.note_to_hz("C2"),  # best so far
-                # n_bins=42,
-                # bins_per_octave=14,
-                # n_fft=256,
-                # hop_length=2048
-                # sr=sample_rate,
-                # bins_per_octave=6,
-                # hop_length=256,
-            )
-        ),
-        ref=np.max,
-    )
+    D = rmsNorm(tf.abs(librosa.cqt(audio, sr=sample_rate)), -30)
+
+    if amp_to_db:
+        D = librosa.amplitude_to_db(D, ref=np.max)
 
     D = np.expand_dims(D, -1)
-    if notes:
-        D = Resizing(32, 32)(D)
-    else:
-        D = Resizing(128, 128)(D)
-    D = np.expand_dims(minmax_scale(np.squeeze(D, -1)), -1)
+    if Resize:
+        D = tf.image.resize(D, Resize, method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
+    D = np.squeeze(D, -1)
+    if minmax:
+        D = minmax_scale(D)
+    if expand_dims:
+        D = np.expand_dims(D, -1)
+
     """ if D.shape[1] < 216:
         D = np.pad(
             D, ((0, 0), (0, 216 - D.shape[1])), "constant", constant_values=np.min(D)
@@ -122,11 +115,21 @@ def loadAndPrepare(
     path,
     audio_limit_sec=(None, None),
     sample_rate=None,
-    notes=True,
+    expand_dims=True,
+    amp_to_db=True,
+    minmax=True,
+    Resize=None,
 ):
     audio, sample_rate = load(path, audio_limit_sec, sample_rate)
 
-    S = Prepare(audio, sample_rate, notes)
+    S = Prepare(
+        audio,
+        sample_rate,
+        expand_dims=expand_dims,
+        amp_to_db=amp_to_db,
+        minmax=minmax,
+        Resize=Resize,
+    )
 
     return S, sample_rate
 

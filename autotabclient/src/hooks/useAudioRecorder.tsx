@@ -1,8 +1,61 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+export const useMediaRecorder = () => {
+    const [audio, setAudio] = useState(new Audio());
+    const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+
+    const handleDataAvailable = (event: any) => {
+        if (event.data.size > 0) {
+            const chunks = [];
+            chunks.push(event.data);
+            const blob = new Blob(chunks, { type: 'audio/wav' });
+            setAudioBlob(blob);
+        }
+    };
+
+    const record = () => {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then((stream) => {
+                const mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = handleDataAvailable;
+                mediaRecorderRef.current = mediaRecorder;
+                mediaRecorder.start();
+            })
+            .catch((error) => console.error('Error accessing microphone:', error));
+    };
+
+    const stop = () => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+            mediaRecorderRef.current.stop();
+        }
+    };
+
+    const exportWav = () => {
+        if (audioBlob) {
+            const url = URL.createObjectURL(audioBlob);
+            //audio blob as wav file
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = 'test.wav';
+
+            setAudio(new Audio(url));
+        }
+    };
+
+    return {
+        audio,
+        audioBlob,
+        record,
+        stop,
+        exportWav,
+    };
+};
 
 
-const useAudioRecorder = () => {
+
+export const useAudioRecorder = () => {
     const context = useRef<AudioContext | null>(null);
     const processor = useRef<ScriptProcessorNode | null>(null);
     const input = useRef<MediaStreamAudioSourceNode | null>(null);
@@ -109,5 +162,3 @@ const useAudioRecorder = () => {
 
 
 }
-
-export default useAudioRecorder
