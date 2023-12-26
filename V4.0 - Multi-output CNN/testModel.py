@@ -21,16 +21,16 @@ model = load_model("Models/model_chords.h5")
 spec, _ = loadAndPrepare(
     path,
     sample_rate=44100,
-    audio_limit_sec=(0.38, 0.8),
+    # audio_limit_sec=(0.38, 0.8),
     # audio_limit_sec=(1.23, 2.43),
-    # audio_limit_sec=(1.82, 2.12),
+    audio_limit_sec=(1.82, 2.12),
     # audio_limit_sec=(2.05, 2.36),
     # audio_limit_sec=(1.5, 1.7),
-    notes=False,
 )
 
 
 y_pred = model.predict(spec.reshape(1, spec.shape[0], spec.shape[1], 1))
+
 
 for i, pred in enumerate(y_pred):
     confidence = np.max(pred) * 100

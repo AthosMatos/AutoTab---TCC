@@ -9,7 +9,7 @@ from scipy.signal import butter, filtfilt
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal import deconvolve
 from utils.audio.rmsNorm import rmsNorm
-from utils.audio.load_prepare import loadAndPrepare
+from utils.audio.load_prepare_CURRENT import loadAndPrepare
 
 
 def reverberation_reduction(signal, impulse_response):

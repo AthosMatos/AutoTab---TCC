@@ -6,7 +6,7 @@ from utils.files.loadFiles import getFilesPATHS, findFilePath
 
 paths = getFilesPATHS(
     CUSTOM_DATASETS.path,
-    ignores=["chords"],
+    ignores=["notes"],
     extension=".wav",
     randomize=True,
     maxFiles=10,
@@ -19,7 +19,6 @@ for path in paths:
     spec, _ = loadAndPrepare(
         path,
         sample_rate=sr,
-        notes=False,
     )
     print(spec.shape)
     specs.append(spec)

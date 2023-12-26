@@ -1,5 +1,5 @@
 import numpy as np
-from utils.audio.load_prepare import load
+from utils.audio.load_prepare_CURRENT import load
 from utils.audio.rmsNorm import rmsNorm
 import os
 import librosa

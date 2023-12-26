@@ -3,7 +3,7 @@ import librosa
 import soundfile as sf
 import matplotlib.pyplot as plt
 import numpy as np
-from utils.audio.load_prepare import Prepare
+from utils.audio.load_prepare_CURRENT import Prepare
 
 path = f"{RAW_DATASETS.AthosSet}\\chords\\AMajor\\E2-A2-E3-A3-C♯4-E4\eletric - Chord - A - 1.wav"
 

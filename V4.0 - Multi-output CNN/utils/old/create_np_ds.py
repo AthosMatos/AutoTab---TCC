@@ -1,7 +1,7 @@
 from multiprocessing import Manager, Process, cpu_count
 import os
 from typing import List
-from utils.audio.load_prepare import Prepare, load
+from utils.audio.load_prepare_CURRENT import Prepare, load
 from utils.notes import genNotes
 import tensorflow as tf
 import numpy as np

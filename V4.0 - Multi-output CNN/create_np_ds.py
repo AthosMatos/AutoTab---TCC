@@ -12,7 +12,6 @@ GUITAR_NOTES = genNotes_v2("C2", "A6")
 
 np.save(f"all_labels.npy", GUITAR_NOTES)
 
-notes = True
 outPath = "notes_np_cqt_44.1k"
 sampleRate = 44100
 ignore = ["chords"]
@@ -176,7 +175,10 @@ def load_from_path(
     #
     for index, path in enumerate(PATHS):
         # spec, sr = loadAndPrepare(path)
-        audio, _ = loadAndPrepare(path, sample_rate=sampleRate, notes=notes)
+        audio, _ = loadAndPrepare(
+            path,
+            sample_rate=sampleRate,
+        )
 
         loaded_audios.append(audio)
         loaded_labels.append(LABELS[index])
