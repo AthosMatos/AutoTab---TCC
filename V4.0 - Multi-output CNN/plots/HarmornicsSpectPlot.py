@@ -1,6 +1,6 @@
 import librosa
 import matplotlib.pyplot as plt
-from utils.audio.load_prepare_CURRENT import loadAndPrepare
+from utils.audio.load_prepare_prev import loadAndPrepare
 import numpy as np
 from utils.paths import CUSTOM_DATASETS, RAW_DATASETS
 

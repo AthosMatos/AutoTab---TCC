@@ -1,111 +1,99 @@
-import tensorflow as tf
-import numpy as np
+from keras.models import Model
+from keras.optimizers import Adam
+from keras.metrics import CategoricalAccuracy, MeanAbsoluteError
+
+from keras.losses import categorical_crossentropy, mean_squared_error
 from keras.layers import (
-    Conv2D,
+    LSTM,
+    TimeDistributed,
+    Input,
     Dense,
+    RepeatVector,
+    Conv2D,
     MaxPooling2D,
-    Activation,
+    Conv1D,
+    MaxPooling1D,
     Flatten,
     Dropout,
-    Input,
-    BatchNormalization,
-    GlobalAveragePooling2D,
-    Resizing,
-    TimeDistributed,
-    LSTM,
-    RepeatVector,
     Bidirectional,
+    Activation,
+    Reshape,
+    BatchNormalization,
 )
-from keras.losses import (
-    BinaryCrossentropy,
-    BinaryFocalCrossentropy,
-    CategoricalCrossentropy,
-)
+import numpy as np
+import matplotlib.pyplot as plt
+from keras.preprocessing.text import Tokenizer
+from keras.callbacks import LearningRateScheduler
+from keras.callbacks import ModelCheckpoint, EarlyStopping
 
 
-train_ds, unique_labels = (
-    np.load("chords_np_cqt_44.1k/train_ds-6out.npz"),
-    np.load("all_labels.npy"),
-)
+# define mode
+inputs = Input(shape=(X.shape[1], X.shape[2], X.shape[3]))
 
-train_x = train_ds["x"]
-train_y = train_ds["y"]
-
-print(train_x.shape)
-print(train_y.shape)
-
-""" train_y = []
-# fill train_y with all the values from train_ds["y"]
-for i in range(len(unique_labels)):
-    train_y.append(train_ds["y"][:, i]) """
-
-input_shape = (train_x.shape[1], train_x.shape[2], 1)
-num_labels = len(unique_labels)
-
-print("")
-
-print(f"Training with {len(train_x)} files")
-print("")
-
-
-inputs = Input(shape=input_shape)
-x = Conv2D(32, 3, padding="same", activation="relu", strides=(2, 2))(inputs)
+x = Conv2D(32, 3, padding="same")(inputs)
+x = BatchNormalization()(x)
+x = Activation("relu")(x)
 x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(x)
 x = Dropout(0.25)(x)
 
-x = Conv2D(64, 3, padding="same", activation="relu")(x)
+x = Conv2D(64, 3, padding="same")(x)
+x = BatchNormalization()(x)
+x = Activation("relu")(x)
 x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(x)
 x = Dropout(0.25)(x)
 
-x = Conv2D(128, 3, padding="same", activation="relu")(x)
+x = Conv2D(128, 3, padding="same")(x)
+x = BatchNormalization()(x)
+x = Activation("relu")(x)
 x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(x)
 x = Dropout(0.25)(x)
 
-latent_dim = 128
+convoluted_vector = TimeDistributed(Flatten())(x)
 
-encoder_input = Flatten()(x)
-
-dense_mid = Dense(512, activation="relu")(encoder_input)
-
-encoder_input = RepeatVector(num_labels)(dense_mid)
-
-bidirectional_encoder = Bidirectional(
-    LSTM(units=latent_dim, return_sequences=True, dropout=0.25)
-)(encoder_input)
-
-decoder_dense = TimeDistributed(Dense(1, activation="sigmoid"))(bidirectional_encoder)
+encoder_output = Bidirectional(LSTM(256, return_sequences=True, dropout=0.2))(
+    convoluted_vector
+)
+encoder_output = Bidirectional(LSTM(128, return_sequences=True, dropout=0.2))(
+    encoder_output
+)
 
 
-model = tf.keras.Model(inputs, decoder_dense)
+out_notes = TimeDistributed(Dense(128))(encoder_output)
+out_notes = TimeDistributed(BatchNormalization())(out_notes)
+out_notes = TimeDistributed(Activation("relu"))(out_notes)
+out_notes = TimeDistributed(Dropout(0.5))(out_notes)
 
+out_notes = TimeDistributed(
+    Dense(notes_outs_len, activation="softmax"), name="notes_output"
+)(out_notes)
+
+out_times = TimeDistributed(Dense(128))(encoder_output)
+out_times = TimeDistributed(BatchNormalization())(out_times)
+out_times = TimeDistributed(Activation("relu"))(out_times)
+out_times = TimeDistributed(Dropout(0.5))(out_times)
+
+out_times = TimeDistributed(Dense(2), name="times_output")(out_times)
+
+
+model = Model(inputs=inputs, outputs=[out_notes, out_times])
+metrics = {
+    "notes_output": "categorical_accuracy",  # Adjust based on your task
+    "times_output": "mean_squared_error",  # Mean Squared Error
+}
+losses = {
+    "notes_output": "categorical_crossentropy",  # Adjust based on your task
+    "times_output": "mean_squared_error",  # Mean Squared Error
+}
+model.compile(
+    optimizer="adam",  #'rmsprop'
+    loss=losses,  # 'mse
+    metrics=metrics,
+)
+# fit model
 
 model.summary()
 
 # plot model
 from keras.utils import plot_model
 
-plot_model(
-    model, to_file="model_lstm_plot.png", show_shapes=True, show_layer_names=True
-)
-
-
-exit()
-
-model.compile(
-    optimizer=tf.keras.optimizers.Adam(),
-    loss=BinaryCrossentropy(),  # BinaryFocalCrossentropy(),
-    metrics=["accuracy"],
-)
-
-model.fit(
-    train_x,
-    train_y,
-    validation_split=0.2,
-    batch_size=128,
-    epochs=28,
-    verbose=1,
-    # callbacks=callbacks
-)
-
-# save the model
-model.save("/content/drive/MyDrive/AutoTAB/Models/model_chords_lstm.h5")
+plot_model(model, to_file="EncoderDecoder.png", show_shapes=True, show_layer_names=True)

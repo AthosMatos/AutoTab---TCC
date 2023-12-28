@@ -11,7 +11,8 @@ import { ShowButton } from "../../components/Buttons/Show"
 import { LoopButton } from "../../components/Buttons/Loop"
 import { PredictButtonsContainer } from "../../components/Buttons"
 import Recorder from "../../Recorder/src/recorder"
-import useAudioRecorder from "../../hooks/useAudioRecorder"
+import { useMediaRecorder } from "../../hooks/useAudioRecorder"
+
 
 const SeqTest3 = [
     "D6",
@@ -37,7 +38,7 @@ const MainPage = () => {
     const chords = AudioEventAnalyser(SeqTest3, allNotesFromFrets, frets)
     const { updatePredictSpeed } = usePlaybackContext()
     const { connect, isConnected, send } = useWebSocket()
-    const { startRecording, stopRecording, audioData } = useAudioRecorder()
+    const {  } = useMediaRecorder()
 
 
 
@@ -105,11 +106,11 @@ const MainPage = () => {
             alignItems: 'center',
         }}>
 
-            <button onClick={startRecording}>Start Recording</button>
+            {/* <button onClick={startRecording}>Start Recording</button>
             <button onClick={() => {
                 stopRecording()
                 const audioFlat: any[] = []
-                audioData?.forEach((data) => {
+                audioData?.forEach((data:any) => {
                     data.forEach((d: any) => {
                         audioFlat.push(d)
                     })
@@ -119,7 +120,7 @@ const MainPage = () => {
                 console.log(audioFlat.length / 44100)
                 send({ data: audioFlat }, true)
                 console.log(audioFlat)
-            }}>Stop Recording</button>
+            }}>Stop Recording</button> */}
             {/* <button onClick={playAudio} disabled={!audioUrl}>
                 Play Audio
             </button> */}

@@ -9,7 +9,6 @@ from scipy.signal import butter, filtfilt
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal import deconvolve
 from utils.audio.rmsNorm import rmsNorm
-from utils.audio.load_prepare_CURRENT import loadAndPrepare
 
 
 def reverberation_reduction(signal, impulse_response):
@@ -51,7 +50,7 @@ def bandpass_filter(signal, lowcut, highcut, fs, order=4):
     return filtfilt(b, a, signal)
 
 
-SR = 16000
+SR = 44100
 # audio, sr = librosa.load(RAW_DATASETS.path + "/musics/riff test 3 notes.wav", sr=sr)
 audio, SR = librosa.load(
     RAW_DATASETS.path + "/musics/my bron-yr-aur.mp3", sr=SR, duration=8
@@ -68,19 +67,27 @@ spec = tf.image.resize(spec, (128, 128)) """
 
 
 specs = []
-specs.append((tf.abs(librosa.cqt(audio, sr=SR)), "cqt"))
-
 specs.append(
     (
-        loadAndPrepare(
-            RAW_DATASETS.path + "/musics/my bron-yr-aur.mp3",
-            sample_rate=SR,
-            expand_dims=False,
-            audio_limit_sec=(0, 8),
-            amp_to_db=True,
-            minmax=False,
-            Resize=(128, 128),
-        )[0],
+        librosa.amplitude_to_db(
+            tf.abs(librosa.cqt(audio, sr=SR, fmin=librosa.note_to_hz("C2"))), ref=np.max
+        ),
+        "cqt",
+    )
+)
+
+spec = tf.abs(
+    librosa.cqt(
+        audio,
+        sr=SR,
+        fmin=librosa.note_to_hz("C2"),
+    )
+)
+spec = rmsNorm(spec, -20)
+spec = librosa.amplitude_to_db(spec, ref=np.max)
+specs.append(
+    (
+        spec,
         "my bron-yr-aur",
     )
 )

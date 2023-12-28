@@ -15,3 +15,4 @@ WebSocketServer/Models/model.h5
 *.npz
 V4.0 - Multi-output CNN/notes_np_cqt_44.1k/train_ds-6out.npz
 V4.0 - Multi-output CNN/chords_np_cqt_44.1k/train_ds-6out.npz
+*.npz
