@@ -12,7 +12,10 @@ if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
 
-def Prepare(audio, sample_rate, expand_dims=True, amp_to_db=True):
+""" test this yet """
+
+
+def Prepare(audio, sample_rate, expand_dims=True, amp_to_db=True, pad=False):
     # audio = librosa.effects.harmonic(y=audio, margin=3)  # best so far for chords
     D = np.abs(
         librosa.cqt(
@@ -21,20 +24,9 @@ def Prepare(audio, sample_rate, expand_dims=True, amp_to_db=True):
             fmin=librosa.note_to_hz("C2"),  # best so far
         )
     )
-    # D = rmsNorm(D, -30)
-    if amp_to_db:
-        """D = librosa.amplitude_to_db(D, ref=np.max)"""
 
     D = minmax_scale(D)
-
-    """ if D.shape[1] < 216:
-        D = np.pad(D, ((0, 0), (0, 216 - D.shape[1])), "constant", constant_values=0)
-    elif D.shape[1] > 216:
-        D = D[:, :216] """
-
-    if expand_dims:
-        D = np.expand_dims(D, -1)
-
+    D = np.expand_dims(D, -1)
     D = tf.image.resize(D, (128, 128), method="bicubic").numpy()
 
     return D
@@ -63,10 +55,13 @@ def loadAndPrepare(
     sample_rate=None,
     expand_dims=True,
     amp_to_db=True,
+    pad=False,
 ):
     audio, sample_rate = load(path, audio_limit_sec, sample_rate)
 
-    S = Prepare(audio, sample_rate, expand_dims=expand_dims, amp_to_db=amp_to_db)
+    S = Prepare(
+        audio, sample_rate, expand_dims=expand_dims, amp_to_db=amp_to_db, pad=pad
+    )
 
     return S, sample_rate
 

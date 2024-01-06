@@ -1,7 +1,6 @@
 from utils.audio.load_prepare import Prepare
 import numpy as np
 from keras.models import load_model
-import mido
 from midi2audio import FluidSynth
 import librosa
 from midiutil import MIDIFile
@@ -16,6 +15,7 @@ LABELS = np.load("all_labels.npy")
 # mix_model = load_model("Models/model_mix.h5")
 model_chords = load_model("Models/model_chords.h5")
 model_notes = load_model("Models/model_notes.h5")
+model_mix = load_model("Models/model_mix.h5")
 
 
 def predict_notes(audio_window, model):
@@ -56,8 +56,8 @@ def create_midi_from_array(track_arrays, output_midi_filename, output_wav_filena
 
         for note, sec_in, sec_out in note_array:
             pitch = note  # MIDI note number
-            start_time = int(sec_in * 1000)  # Convert seconds to milliseconds
-            end_time = int(sec_out * 1000)
+            start_time = int(sec_in * 2500)  # Convert seconds to milliseconds
+            end_time = int(sec_out * 2500)
             duration = end_time - start_time
 
             midi.addNote(track, 0, pitch, start_time, duration, 100)  # 100 is velocity
@@ -89,7 +89,7 @@ def AWA(
     SR,
     ONSETS,
     MaxSteps=None,
-    model="chords" or "notes",
+    model="chords" or "notes" or "mix",
     gen_audio=False,
 ):
     ONSETS_SEC, ONSETS_SR = ONSETS
@@ -98,8 +98,8 @@ def AWA(
     AUDIO_WIN_ACCOMULATE_LEN_SEC = 0.1  # 0.1 seconds
     """ The AUDIO_WIN_ACCOMULATE_LEN is the amount of audio that 
     will be acomulated over time with the new audio batches coming from the websocket"""
-    MAX_AUDIO_WINDOW_SIZE = int(SR)  # 2.5 seconds
-    MAX_AUDIO_WINDOW_SIZE_SEC = 1  # 2.5 seconds
+    MAX_AUDIO_WINDOW_SIZE = int(2.5 * SR)  # 2.5 seconds
+    MAX_AUDIO_WINDOW_SIZE_SEC = 2.5  # 2.5 seconds
 
     AUDIO_MAX_SEC = AUDIO_SECS
     print(f"|| AUDIO_MAX_SEC: {AUDIO_MAX_SEC} ||")
@@ -136,10 +136,13 @@ def AWA(
             audio_window = Prepare(
                 ad,
                 sample_rate=SR,
+                pad=True,
             )
             model_to_use = model_chords
             if model == "notes":
                 model_to_use = model_notes
+            """ elif model == "mix":
+                model_to_use = model_mix """
             notes_preds, general_confidence = predict_notes(audio_window, model_to_use)
 
             if len(notes_preds) == 0:
@@ -200,5 +203,9 @@ def AWA(
                 index += 1
 
         preds += 1
+
+    # if temp folder does not exist, create it
+    if not os.path.exists("Temp"):
+        os.makedirs("Temp")
 
     create_midi_from_array(tracks, "Temp/output.mid", "AWA_predict_audio.wav")

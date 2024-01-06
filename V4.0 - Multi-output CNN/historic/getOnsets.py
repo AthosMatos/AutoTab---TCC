@@ -14,6 +14,17 @@ def stft_onsets(AUDIO, SR):
     ONSET_FRAMES = librosa.frames_to_time(onset_bt, sr=SR)
 
     return ONSET_FRAMES
+    """ D = np.abs(librosa.stft(y=AUDIO))
+
+    o_env = librosa.onset.onset_strength(
+        y=AUDIO, sr=SR, aggregate=np.median, fmax=8000, n_mels=256
+    )
+    onset_frames = librosa.onset.onset_detect(onset_envelope=o_env, sr=SR)
+
+    rms = librosa.feature.rms(S=D)
+    onset_bt_rms = librosa.onset.onset_backtrack(onset_frames, rms[0])
+
+    return librosa.frames_to_time(onset_bt_rms, sr=SR) """
 
 
 #
@@ -38,7 +49,7 @@ def cqt_onsets(AUDIO, SR):
 
 
 def get_onsets(AUDIO, SR, onset_frames=None):
-    AUDIO = rmsNorm(AUDIO, -50)
+    # AUDIO = rmsNorm(AUDIO, -50)
     if onset_frames is None:
         ONSET_FRAMES = stft_onsets(AUDIO, SR)
     else:
@@ -48,10 +59,14 @@ def get_onsets(AUDIO, SR, onset_frames=None):
     MIN_AUDIO_WINDOW_SIZE = 0.1  # 0.1 seconds / 100ms
 
     ON_FRAMES = []
-    for i in range(len(ONSET_FRAMES) - 1):
-        print(
+    for i in range(len(ONSET_FRAMES)):
+        """print(
             f"ONSET_FRAMES[i + 1] - ONSET_FRAMES[i]: {ONSET_FRAMES[i + 1] - ONSET_FRAMES[i]}"
-        )
+        )"""
+        if i + 1 == len(ONSET_FRAMES):
+            ON_FRAMES.append(ONSET_FRAMES[i])
+            ONSET_FRAMES_AS_SAMPLE_RATE.append(int(ONSET_FRAMES[i] * SR))
+            break
         if ONSET_FRAMES[i + 1] - ONSET_FRAMES[i] >= MIN_AUDIO_WINDOW_SIZE:
             ON_FRAMES.append(ONSET_FRAMES[i])
             ONSET_FRAMES_AS_SAMPLE_RATE.append(int(ONSET_FRAMES[i] * SR))

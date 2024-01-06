@@ -12,9 +12,9 @@ GUITAR_NOTES = genNotes_v2("C2", "A6")
 
 np.save(f"all_labels.npy", GUITAR_NOTES)
 
-outPath = "notes_np_cqt_44.1k"
+outPath = "chords_np_cqt_44.1k"
 sampleRate = 44100
-ignore = ["chords"]
+ignore = ["notes"]
 
 
 def printConfig():
@@ -178,6 +178,7 @@ def load_from_path(
         audio, _ = loadAndPrepare(
             path,
             sample_rate=sampleRate,
+            pad=True,
         )
 
         loaded_audios.append(audio)

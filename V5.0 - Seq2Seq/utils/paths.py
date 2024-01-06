@@ -1,9 +1,10 @@
 import os
 
 
-MAIN_PATH = os.getcwd().split("V5.0 - Seq2Seq")[0]
+MAIN_PATH = os.getcwd().split("V4.0 - Multi-output CNN")[0]
 DATASETS = os.path.join(MAIN_PATH, "Datasets")
 NUMPY_DATASETS = os.path.join(DATASETS, "Numpy")
+MODEL_PATH = os.path.join("autotabModels", "model-out6.h5")
 
 
 class DATASET_UTILS:

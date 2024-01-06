@@ -13,12 +13,12 @@ with augmentation
 
 def main():
     # MUSICTESTPATH = RAW_DATASETS.path + "/musics/g chord.wav"
-    # MUSICTESTPATH = RAW_DATASETS.path + "/musics/beach house - clean.wav"
+    MUSICTESTPATH = RAW_DATASETS.path + "/musics/beach house - clean.wav"
     # MUSICTESTPATH = RAW_DATASETS.path + "/musics/my bron-yr-aur.mp3"
     # MUSICTESTPATH = RAW_DATASETS.path + "/musics/TEST SONG.wav"
     # MUSICTESTPATH = RAW_DATASETS.path + "/musics/simple notes test.wav"
     # MUSICTESTPATH = RAW_DATASETS.path + "/musics/fastnotestSeq.wav"
-    MUSICTESTPATH = RAW_DATASETS.path + "/musics/riffs test.wav"
+    # MUSICTESTPATH = RAW_DATASETS.path + "/musics/riffs test.wav"
     # MUSICTESTPATH = RAW_DATASETS.path + "/musics/riff test 3 notes.wav"
     # MUSICTESTPATH = "output.wav"
 
@@ -39,10 +39,10 @@ def main():
         AUDIO,
         SR,
         (ONSETS_SECS, ONSETS_SRS),
-        MaxSteps=40,
-        model="chords",
+        MaxSteps=None,
+        model="notes",
     )
-    # onsets_to_audio(AUDIO, ONSETS_SRS, SR)
+    onsets_to_audio(AUDIO, ONSETS_SRS, SR)
 
 
 if __name__ == "__main__":

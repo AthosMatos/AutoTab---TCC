@@ -55,9 +55,12 @@ for conv in [64, 128, 256]:
 
 x = Flatten()(x)
 
-max_notes_context = 100
-max_notes = num_labels
-lstm_input = Input(shape=(max_notes_context, max_notes))
+lstm_input = Input(shape=(None, train_x.shape[2], 1))
+x_lstm = convLayer(lstm_input, 32)
+for conv in [64, 128, 256]:
+    x_lstm = convLayer(x_lstm, conv)
+
+x_lstm = Flatten()(x_lstm)
 
 
 x = Dense(256)(x)
